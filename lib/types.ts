@@ -35,7 +35,7 @@ export interface Stock {
   warehouseId: string; //FK
   supplierId: string; //FK
 
-  qty: number; // whole units
+  qty: number; // whole units integer
 }
 
 // price is depended on per supplier
@@ -62,8 +62,8 @@ export interface SubOrder {
   supplierId: string; //FK SP-000 means any
 
   seq: number;
-  requestQty: number; // whole units
-  allocatedQty: number; //sum of allocation qty, whole units
+  requestQty: number; // whole units integer
+  allocatedQty: number; //sum of allocation qty, whole units integer
   totalAmount: number; //sum of allocation amount
   priorityType: PriorityType; // "EMERGENCY" | "OVER_DUE" | "DAILY";
   fillStatus: FillStatus; // "FULL" | "PARTIAL" | "NONE";
@@ -79,7 +79,7 @@ export interface Allocation {
   warehouseId: string; //FK
   supplierId: string; // FK
 
-  qty: number; // whole units
+  qty: number; // whole units integer
   unitPrice: number;
   amount: number;
   operation: Operation; // "AUTO" | "MANUAL"

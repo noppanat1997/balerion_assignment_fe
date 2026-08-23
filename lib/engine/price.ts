@@ -5,8 +5,6 @@ import { Price, PriorityType } from "../types";
 export const priceKey = (salmonId: string, supplierId: string) =>
   `${salmonId}|${supplierId}`;
 
-// a row without a positive price is not a usable price, treat it the same as
-// "no price assigned yet" so the engine and pickStock skip it by the same rule
 export function findPrice(
   salmonId: string,
   supplierId: string,
