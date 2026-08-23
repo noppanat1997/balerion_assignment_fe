@@ -1,5 +1,6 @@
 import { ANY_SUPPLIER, ANY_WAREHOUSE } from "@/lib/constants";
 import { allocate, AllocateInput } from "@/lib/engine/allocate";
+import { manualAllocate, ManualAllocateInput } from "@/lib/engine/manual";
 import { Customer, Price, PriorityType, Stock, SubOrder } from "@/lib/types";
 import { describe, expect, it } from "vitest";
 
@@ -323,5 +324,84 @@ describe("allocate", () => {
     expect(ids).toHaveLength(2);
     expect(new Set(ids).size).toBe(2);
     expect(ids.every((id) => id.length > 0)).toBe(true);
+  });
+});
+
+const runManual = (over: Partial<ManualAllocateInput> = {}) =>
+  manualAllocate({
+    subOrderId: "SO-001",
+    subOrders: [subOrder()],
+    stocks: [stock()],
+    prices: [price()],
+    customers: [customer()],
+    ...over,
+  });
+
+describe("manualAllocate", () => {
+  it("fills the targeted sub order from available stock, tagged MANUAL", () => {
+    const res = runManual();
+
+    expect(res.subOrders[0]).toMatchObject({
+      allocatedQty: 10,
+      totalAmount: 1000,
+      fillStatus: "FULL",
+    });
+    expect(res.newAllocations).toHaveLength(1);
+    expect(res.newAllocations[0]).toMatchObject({
+      subOrderId: "SO-001",
+      qty: 10,
+      operation: "MANUAL",
+    });
+  });
+
+  it("only touches the targeted sub order", () => {
+    const res = runManual({
+      subOrders: [
+        subOrder({ id: "SO-001", requestQty: 10 }),
+        subOrder({ id: "SO-other", requestQty: 10 }),
+      ],
+    });
+
+    expect(res.newAllocations.every((a) => a.subOrderId === "SO-001")).toBe(
+      true,
+    );
+    const other = res.subOrders.find((so) => so.id === "SO-other");
+    expect(other).toMatchObject({ allocatedQty: 0, fillStatus: "NONE" });
+  });
+
+  it("leaves an already FULL sub order alone", () => {
+    const res = runManual({
+      subOrders: [
+        subOrder({ requestQty: 10, allocatedQty: 10, fillStatus: "FULL" }),
+      ],
+    });
+
+    expect(res.newAllocations).toHaveLength(0);
+    expect(res.stocks[0].qty).toBe(100);
+  });
+
+  it("respects credit limit like auto allocate", () => {
+    const res = runManual({
+      customers: [customer({ creditLimit: 1000, creditUsed: 350 })],
+    });
+
+    expect(res.newAllocations[0].qty).toBe(6);
+    expect(res.customers[0].creditUsed).toBe(950);
+  });
+
+  it("does nothing when the sub order id is unknown", () => {
+    const res = runManual({ subOrderId: "SO-missing" });
+
+    expect(res.newAllocations).toHaveLength(0);
+    expect(res.subOrders[0].allocatedQty).toBe(0);
+  });
+
+  it("never mutates the input", () => {
+    const so = subOrder();
+    const s = stock();
+    runManual({ subOrders: [so], stocks: [s] });
+
+    expect(so.allocatedQty).toBe(0);
+    expect(s.qty).toBe(100);
   });
 });

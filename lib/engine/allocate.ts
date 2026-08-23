@@ -1,9 +1,6 @@
-import { nanoid } from "nanoid";
-import { divide, floor, minus, multiply, plus, round2 } from "../money";
 import { Allocation, Customer, Price, Stock, SubOrder } from "../types";
-import { getUnitPrice } from "./price";
+import { fillSubOrder } from "./fill";
 import { sortSubOrders } from "./sort";
-import { pickStock } from "./stock";
 
 export interface AllocateInput {
   subOrders: SubOrder[];
@@ -29,94 +26,15 @@ export function allocate(input: AllocateInput): AllocateResult {
   );
 
   for (const so of sortSubOrders(subOrders)) {
-    if (so.fillStatus === "FULL") {
-      continue;
-    }
-
     const customer = mapCustomer[so.customerId];
     if (customer === undefined) {
       // orphan sub order, we have no credit to spend
       continue;
     }
 
-    let creditLeft = minus(customer.creditLimit, customer.creditUsed);
-    if (creditLeft <= 0) {
-      continue;
-    }
-
-    let needQty = floor(so.requestQty - so.allocatedQty);
-    if (needQty <= 0) {
-      continue;
-    }
-
-    const eligibleStocks = pickStock(so, stocks, input.prices);
-    for (const s of eligibleStocks) {
-      const unitPrice = getUnitPrice(
-        so.priorityType,
-        s.salmonId,
-        s.supplierId,
-        input.prices,
-      );
-      if (unitPrice === null) {
-        // skip no assinged price yet
-        continue;
-      }
-
-      let pickQty = 0;
-      if (s.qty <= needQty) {
-        // take all salmon from stock
-        pickQty = s.qty;
-      } else {
-        // take some salmon from stock
-        pickQty = needQty;
-      }
-
-      if (creditLeft < round2(multiply(pickQty, unitPrice))) {
-        // partial: take only what the remaining credit can afford
-        pickQty = floor(divide(creditLeft, unitPrice));
-      }
-      if (pickQty < 1) {
-        continue;
-      }
-
-      const amount = round2(multiply(pickQty, unitPrice));
-
-      // mutate Stock
-      s.qty -= pickQty;
-
-      // mutate Customer
-      customer.creditUsed = plus(customer.creditUsed, amount);
-      creditLeft = minus(creditLeft, amount);
-
-      needQty -= pickQty;
-
-      // mutate SubOrder
-      so.allocatedQty += pickQty;
-      so.totalAmount = plus(so.totalAmount, amount);
-
-      allocations.push({
-        id: nanoid(),
-        subOrderId: so.id,
-        salmonId: s.salmonId,
-        warehouseId: s.warehouseId,
-        supplierId: s.supplierId,
-        qty: pickQty,
-        unitPrice: unitPrice,
-        amount,
-        operation: "AUTO",
-      });
-
-      if (needQty <= 0) {
-        so.fillStatus = "FULL";
-        break;
-      }
-      so.fillStatus = "PARTIAL";
-
-      if (creditLeft <= 0) {
-        // use all credit
-        break;
-      }
-    }
+    allocations.push(
+      ...fillSubOrder(so, stocks, input.prices, customer, "AUTO"),
+    );
   }
 
   return {
