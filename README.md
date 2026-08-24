@@ -1,6 +1,6 @@
 # SALMONERIA
 
-TLDR: salmon order allocation dashboard — matches sub orders to warehouse stock by priority, credit, and price, with manual override.
+TLDR: salmon order allocation dashboard — matches sub orders to warehouse stock by priority, credit, and price, with manual override. Design and core logic (engine, store, data model) are mine; AI (Claude) only helped with cosmetic polish.
 
 Live: https://salmoneria.motionbi.work/
 
@@ -24,10 +24,6 @@ lib/          Types, constants, money & formatting helpers
 store/        Zustand store wiring the engine to the UI
 tests/        Vitest unit tests, one file per engine concern
 ```
-
-## Design & credit
-
-Design, architecture, and the allocation/pricing/manual-assign engine (`lib/engine`), state store, and data model are designed and implemented by me. Claude (Anthropic) was used as a coding assistant for cosmetic polish and small utilities (formatting helpers, UI primitive tweaks, this README) — a deliberate demo of AI-assisted prompting, not core logic.
 
 ## Data model
 
