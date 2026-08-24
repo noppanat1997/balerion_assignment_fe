@@ -1,4 +1,3 @@
-import { nanoid } from "nanoid";
 import {
   Allocation,
   Customer,
@@ -20,6 +19,7 @@ import {
   SUPPLIERS,
   WAREHOUSES,
 } from "./data";
+import { nextId, random, resetSeed, subOrderId } from "./seed";
 
 export interface Dataset {
   salmons: Salmon[];
@@ -34,10 +34,10 @@ export interface Dataset {
 }
 
 const PRIORITY_TYPES: PriorityType[] = ["EMERGENCY", "OVER_DUE", "DAILY"];
-const MIN_SUBORDERS = 5000;
+export const DEFAULT_MIN_SUBORDERS = 5000;
 
 const randInt = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+  Math.floor(random() * (max - min + 1)) + min;
 
 const pick = <T>(items: T[]): T => items[randInt(0, items.length - 1)];
 
@@ -60,7 +60,7 @@ function generateCustomers(): Customer[] {
   return CUSTOMER_NAMES.map((name) => {
     const creditLimit = randInt(50, 500) * 1000;
     return {
-      id: nanoid(),
+      id: nextId("CT"),
       name,
       creditLimit,
       creditUsed: randInt(0, creditLimit * 0.5),
@@ -73,7 +73,7 @@ function generatePrices(): Price[] {
   for (const salmon of SALMONS) {
     for (const supplier of REAL_SUPPLIERS) {
       prices.push({
-        id: nanoid(),
+        id: nextId("PRC"),
         salmonId: salmon.id,
         supplierId: supplier.id,
         price: randInt(100, 500),
@@ -89,7 +89,7 @@ function generateStocks(): Stock[] {
     for (const warehouse of REAL_WAREHOUSES) {
       for (const supplier of REAL_SUPPLIERS) {
         stocks.push({
-          id: nanoid(),
+          id: nextId("STK"),
           salmonId: salmon.id,
           warehouseId: warehouse.id,
           supplierId: supplier.id,
@@ -101,30 +101,35 @@ function generateStocks(): Stock[] {
   return stocks;
 }
 
-function generateOrdersAndSubOrders(customers: Customer[]) {
+function generateOrdersAndSubOrders(
+  customers: Customer[],
+  minSubOrders: number,
+) {
   const orders: Order[] = [];
   const subOrders: SubOrder[] = [];
 
-  while (subOrders.length < MIN_SUBORDERS) {
-    const order: Order = { id: nanoid(), customerId: pick(customers).id };
+  while (subOrders.length < minSubOrders) {
+    const order: Order = {
+      id: nextId("ORDER"),
+      customerId: pick(customers).id,
+    };
     orders.push(order);
 
     const lineCount = randInt(1, 4);
     for (let seq = 0; seq < lineCount; seq++) {
       subOrders.push({
-        id: nanoid(),
+        id: subOrderId(order.id, seq + 1),
         orderId: order.id,
         customerId: order.customerId,
         salmonId: pick(SALMONS).id,
         warehouseId: pick(WAREHOUSES).id,
         supplierId: pick(SUPPLIERS).id,
-        seq,
         requestQty: randInt(1, 200),
         allocatedQty: 0,
         totalAmount: 0,
         priorityType: pick(PRIORITY_TYPES),
         fillStatus: "NONE",
-        remark: Math.random() < 0.2 ? pick(REMARKS) : undefined,
+        remark: random() < 0.2 ? pick(REMARKS) : undefined,
         createdAt: randomDate(),
       });
     }
@@ -133,9 +138,20 @@ function generateOrdersAndSubOrders(customers: Customer[]) {
   return { orders, subOrders: shuffle(subOrders) };
 }
 
-export function generateDataset(): Dataset {
+export interface GenerateOptions {
+  seed?: number;
+  minSubOrders?: number;
+}
+
+export function generateDataset(options: GenerateOptions = {}): Dataset {
+  const { seed, minSubOrders = DEFAULT_MIN_SUBORDERS } = options;
+  resetSeed(seed);
+
   const customers = generateCustomers();
-  const { orders, subOrders } = generateOrdersAndSubOrders(customers);
+  const { orders, subOrders } = generateOrdersAndSubOrders(
+    customers,
+    minSubOrders,
+  );
 
   return {
     salmons: SALMONS,
