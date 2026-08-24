@@ -9,7 +9,6 @@ const subOrder = (over: Partial<SubOrder> = {}): SubOrder => ({
   salmonId: "SM-001",
   warehouseId: "WH-000",
   supplierId: "SP-000",
-  seq: 1,
   requestQty: 10,
   allocatedQty: 0,
   totalAmount: 0,
@@ -30,31 +29,28 @@ describe("sortSubOrders", () => {
     expect(res.map((s) => s.id)).toEqual(["SO-emg", "SO-overdue", "SO-daily"]);
   });
 
-  it("breaks ties within the same priority by createdAt, then orderId, then seq", () => {
+  it("breaks ties within the same priority by createdAt, then orderId, then id", () => {
     const res = sortSubOrders([
       subOrder({
         id: "later",
         createdAt: "2026-08-22T01:00:00.000Z",
         orderId: "OD-001",
-        seq: 1,
       }),
       subOrder({
         id: "earlier",
         createdAt: "2026-08-22T00:00:00.000Z",
         orderId: "OD-001",
-        seq: 1,
       }),
       subOrder({
-        id: "same-time-higher-seq",
+        id: "same-time-higher-id",
         createdAt: "2026-08-22T00:00:00.000Z",
         orderId: "OD-001",
-        seq: 2,
       }),
     ]);
 
     expect(res.map((s) => s.id)).toEqual([
       "earlier",
-      "same-time-higher-seq",
+      "same-time-higher-id",
       "later",
     ]);
   });

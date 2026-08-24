@@ -11,7 +11,7 @@ export function compareSubOrders(a: SubOrder, b: SubOrder): number {
   const byOrder = a.orderId.localeCompare(b.orderId);
   if (byOrder !== 0) return byOrder;
 
-  return a.seq - b.seq;
+  return a.id.localeCompare(b.id);
 }
 
 export function sortSubOrders(subOrders: SubOrder[]): SubOrder[] {

@@ -35,7 +35,6 @@ export const subOrder = (over: Partial<SubOrder> = {}): SubOrder => ({
   salmonId: "SM-001",
   warehouseId: ANY_WAREHOUSE,
   supplierId: ANY_SUPPLIER,
-  seq: 1,
   requestQty: 10,
   allocatedQty: 0,
   totalAmount: 0,
@@ -111,8 +110,8 @@ describe("allocate", () => {
   it("caps allocation to the customer's remaining credit and never overspends across sub orders", () => {
     const res = run({
       subOrders: [
-        subOrder({ id: "SO-001", seq: 1, requestQty: 5 }),
-        subOrder({ id: "SO-002", seq: 2, requestQty: 5 }),
+        subOrder({ id: "SO-001", requestQty: 5 }),
+        subOrder({ id: "SO-002", requestQty: 5 }),
       ],
       customers: [customer({ creditLimit: 700 })],
     });

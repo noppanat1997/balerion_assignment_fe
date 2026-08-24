@@ -61,7 +61,6 @@ export interface SubOrder {
   warehouseId: string; //FK WH-000 means any
   supplierId: string; //FK SP-000 means any
 
-  seq: number;
   requestQty: number; // whole units integer
   allocatedQty: number; //sum of allocation qty, whole units integer
   totalAmount: number; //sum of allocation amount

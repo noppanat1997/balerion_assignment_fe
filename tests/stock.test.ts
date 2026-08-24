@@ -27,7 +27,6 @@ const subOrder = (over: Partial<SubOrder> = {}): SubOrder => ({
   salmonId: "SM-001",
   warehouseId: ANY_WAREHOUSE,
   supplierId: ANY_SUPPLIER,
-  seq: 1,
   requestQty: 10,
   allocatedQty: 0,
   totalAmount: 0,
