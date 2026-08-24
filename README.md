@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SALMONERIA
 
-## Getting Started
+TLDR: salmon order allocation dashboard — matches sub orders to warehouse stock by priority, credit, and price, with manual override.
 
-First, run the development server:
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm test            # unit tests (vitest)
+npm run typecheck
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Design & credit
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Design, architecture, and the allocation/pricing/manual-assign engine (`lib/engine`), state store, and data model are designed and implemented by me. Claude (Anthropic) was used as a coding assistant for cosmetic polish and small utilities (formatting helpers, UI primitive tweaks, this README) — a deliberate demo of AI-assisted prompting, not core logic.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Data model
 
-## Learn More
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ SUB_ORDER : contains
+    CUSTOMER ||--o{ SUB_ORDER : "denormalised on"
+    SALMON ||--o{ SUB_ORDER : requests
+    SALMON ||--o{ STOCK : "held as"
+    WAREHOUSE ||--o{ STOCK : stores
+    SUPPLIER ||--o{ STOCK : supplies
+    SALMON ||--o{ PRICE : "priced per"
+    SUPPLIER ||--o{ PRICE : sets
+    SUB_ORDER ||--o{ ALLOCATION : "fulfilled by"
+    STOCK ||--o{ ALLOCATION : "drawn from"
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    CUSTOMER {
+        string id PK
+        string name
+        number creditLimit
+        number creditUsed
+    }
+    ORDER {
+        string id PK
+        string customerId FK
+    }
+    SUB_ORDER {
+        string id PK
+        string orderId FK
+        string customerId FK
+        string salmonId FK
+        string warehouseId FK
+        string supplierId FK
+        number requestQty
+        number allocatedQty
+        number totalAmount
+        string priorityType
+        string fillStatus
+    }
+    SALMON {
+        string id PK
+        string name
+    }
+    WAREHOUSE {
+        string id PK
+        string name
+    }
+    SUPPLIER {
+        string id PK
+        string name
+    }
+    STOCK {
+        string id PK
+        string salmonId FK
+        string warehouseId FK
+        string supplierId FK
+        number qty
+    }
+    PRICE {
+        string id PK
+        string salmonId FK
+        string supplierId FK
+        number price
+    }
+    ALLOCATION {
+        string id PK
+        string subOrderId FK
+        string salmonId FK
+        string warehouseId FK
+        string supplierId FK
+        number qty
+        number unitPrice
+        number amount
+        string operation
+    }
+```
