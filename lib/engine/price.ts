@@ -1,4 +1,4 @@
-import { PRICE_TIER } from "../constants";
+import { ANY_SUPPLIER, PRICE_TIER } from "../constants";
 import { multiply, round2 } from "../money";
 import { Price, PriorityType } from "../types";
 
@@ -14,6 +14,22 @@ export function findPrice(
     (p) =>
       p.salmonId === salmonId && p.supplierId === supplierId && p.price > 0,
   );
+}
+
+export function findBasePrice(
+  salmonId: string,
+  supplierId: string,
+  prices: Price[],
+): number | null {
+  if (supplierId !== ANY_SUPPLIER) {
+    return findPrice(salmonId, supplierId, prices)?.price ?? null;
+  }
+
+  const candidates = prices
+    .filter((p) => p.salmonId === salmonId && p.price > 0)
+    .map((p) => p.price);
+
+  return candidates.length > 0 ? Math.min(...candidates) : null;
 }
 
 export function getUnitPrice(
