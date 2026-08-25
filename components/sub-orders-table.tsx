@@ -14,17 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ManualAssignDialog } from "@/components/manual-assign-dialog";
 import { TYPE_PRIORITY } from "@/lib/constants";
 import { FillStatus, PriorityType, SubOrder } from "@/lib/types";
-import { formatDate, formatMoney, idName } from "@/lib/utils";
+import { cn, formatDate, formatMoney, idName } from "@/lib/utils";
 
 const ROW_HEIGHT = 44;
 // Only the name columns (Customer/Salmon/Warehouse/Supplier) shrink+truncate
 // under pressure; the rest are sized to their content so badges, numbers,
 // and the action button never overflow their track.
 const GRID_COLS =
-  "grid-cols-[100px_100px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_92px_90px_84px_120px_36px]";
+  "grid-cols-[100px_100px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_92px_90px_84px_120px_minmax(0,1fr)_36px]";
 
 const PRIORITY_VARIANT: Record<PriorityType, "destructive" | "default" | "outline"> = {
   EMERGENCY: "destructive",
@@ -75,6 +76,26 @@ const SORTERS: Record<SortKey, (a: SubOrder, b: SubOrder) => number> = {
   "amount-asc": (a, b) => a.totalAmount - b.totalAmount,
 };
 
+// Truncated cell whose full value shows in a hover tooltip.
+function TruncatedCell({
+  value,
+  tooltip = value,
+  className,
+}: {
+  value: string;
+  tooltip?: string;
+  className?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={cn("truncate", className)}>{value}</div>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function SubOrdersTable() {
   const data = useAllocation((s) => s.data);
   const [assignTarget, setAssignTarget] = useState<string | null>(null);
@@ -82,7 +103,7 @@ export function SubOrdersTable() {
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-  const [sortKey, setSortKey] = useState<SortKey>("default");
+  const [sortKey, setSortKey] = useState<SortKey>("date-desc");
 
   const customerNames = useMemo(
     () => new Map(data.customers.map((c) => [c.id, c.name])),
@@ -236,6 +257,7 @@ export function SubOrdersTable() {
             <div className="text-right">Alloc/Req</div>
             <div>Status</div>
             <div className="text-right">Amount</div>
+            <div>Remark</div>
             <div />
           </div>
 
@@ -257,27 +279,16 @@ export function SubOrdersTable() {
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
-                  <div className="truncate text-xs" title={so.id}>
-                    {so.id}
-                  </div>
-                  <div
-                    className="truncate text-xs"
-                    title={new Date(so.createdAt).toLocaleString()}
-                  >
-                    {formatDate(so.createdAt)}
-                  </div>
-                  <div className="truncate" title={customerName(so.customerId)}>
-                    {customerName(so.customerId)}
-                  </div>
-                  <div className="truncate" title={salmonName(so.salmonId)}>
-                    {salmonName(so.salmonId)}
-                  </div>
-                  <div className="truncate" title={warehouseName(so.warehouseId)}>
-                    {warehouseName(so.warehouseId)}
-                  </div>
-                  <div className="truncate" title={supplierName(so.supplierId)}>
-                    {supplierName(so.supplierId)}
-                  </div>
+                  <TruncatedCell value={so.id} className="text-xs" />
+                  <TruncatedCell
+                    value={formatDate(so.createdAt)}
+                    tooltip={new Date(so.createdAt).toLocaleString()}
+                    className="text-xs"
+                  />
+                  <TruncatedCell value={customerName(so.customerId)} />
+                  <TruncatedCell value={salmonName(so.salmonId)} />
+                  <TruncatedCell value={warehouseName(so.warehouseId)} />
+                  <TruncatedCell value={supplierName(so.supplierId)} />
                   <div className="overflow-hidden">
                     <Badge
                       variant={PRIORITY_VARIANT[so.priorityType]}
@@ -294,9 +305,20 @@ export function SubOrdersTable() {
                       {so.fillStatus}
                     </Badge>
                   </div>
-                  <div className="truncate text-right text-xs">
-                    {formatMoney(so.totalAmount)} THB
-                  </div>
+                  <TruncatedCell
+                    value={`${formatMoney(so.totalAmount)} THB`}
+                    className="text-right text-xs"
+                  />
+                  {so.remark ? (
+                    <TruncatedCell
+                      value={so.remark}
+                      className="text-xs text-muted-foreground"
+                    />
+                  ) : (
+                    <div className="truncate text-xs text-muted-foreground">
+                      —
+                    </div>
+                  )}
                   <div className="flex justify-end">
                     <Button
                       size="icon-sm"
