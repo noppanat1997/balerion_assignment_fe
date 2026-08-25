@@ -74,8 +74,18 @@ describe("pickStock", () => {
   it("orders ANY_WAREHOUSE/ANY_SUPPLIER candidates by highest remaining stock first", () => {
     const stocks = [
       stock({ id: "low", warehouseId: "WH-001", supplierId: "SP-001", qty: 5 }),
-      stock({ id: "high", warehouseId: "WH-002", supplierId: "SP-002", qty: 50 }),
-      stock({ id: "mid", warehouseId: "WH-003", supplierId: "SP-003", qty: 20 }),
+      stock({
+        id: "high",
+        warehouseId: "WH-002",
+        supplierId: "SP-002",
+        qty: 50,
+      }),
+      stock({
+        id: "mid",
+        warehouseId: "WH-003",
+        supplierId: "SP-003",
+        qty: 20,
+      }),
     ];
     const prices = [
       price({ id: "P1", supplierId: "SP-001" }),

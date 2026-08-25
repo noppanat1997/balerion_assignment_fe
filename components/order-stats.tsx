@@ -43,18 +43,27 @@ export function OrderStats() {
   }, [subOrders]);
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <StatTile label="Total requested" value={formatQty(stats.totalRequested)} />
-      <StatTile label="Total allocated" value={formatQty(stats.totalAllocated)} />
+    <div className="gap-3 grid grid-cols-2 sm:grid-cols-4">
+      <StatTile
+        label="Total requested"
+        value={formatQty(stats.totalRequested)}
+      />
+      <StatTile
+        label="Total allocated"
+        value={formatQty(stats.totalAllocated)}
+      />
       <StatTile
         label="Total amount"
         value={`${formatMoney(stats.totalAmount)} THB`}
       />
-      <div className="flex flex-col gap-1.5 rounded-lg border p-3">
-        <div className="flex flex-wrap items-center justify-between gap-x-2 text-xs">
-          <span className="text-muted-foreground">Today allocated / requested</span>
+      <div className="flex flex-col gap-1.5 p-3 border rounded-lg">
+        <div className="flex flex-wrap justify-between items-center gap-x-2 text-xs">
+          <span className="text-muted-foreground">
+            Today allocated / requested
+          </span>
           <span className="font-medium tabular-nums">
-            {formatQty(stats.todayAllocated)} / {formatQty(stats.todayRequested)}
+            {formatQty(stats.todayAllocated)} /{" "}
+            {formatQty(stats.todayRequested)}
           </span>
         </div>
         <Progress value={stats.todayAllocatedRatio} />
@@ -65,9 +74,9 @@ export function OrderStats() {
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border p-3">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-lg font-medium tabular-nums">{value}</span>
+    <div className="flex flex-col gap-1.5 p-3 border rounded-lg">
+      <span className="text-muted-foreground text-xs">{label}</span>
+      <span className="font-medium tabular-nums text-lg">{value}</span>
     </div>
   );
 }

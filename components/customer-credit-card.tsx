@@ -22,12 +22,12 @@ export function CustomerCreditCard({
     creditLimit > 0 ? Math.min(100, (projectedUsed / creditLimit) * 100) : 0;
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border p-3">
-      <div className="flex flex-wrap items-center justify-between gap-x-2 text-xs">
+    <div className="flex flex-col gap-1.5 p-3 border rounded-lg">
+      <div className="flex flex-wrap justify-between items-center gap-x-2 text-xs">
         <span className="text-muted-foreground">Credit left</span>
         <span
           className={cn(
-            "min-w-0 truncate font-medium",
+            "min-w-0 font-medium truncate",
             overCredit ? "text-destructive" : "text-foreground",
           )}
         >
@@ -39,7 +39,7 @@ export function CustomerCreditCard({
         indicatorClassName={overCredit ? "bg-destructive" : undefined}
       />
       {overCredit && (
-        <p className="text-xs text-destructive">
+        <p className="text-destructive text-xs">
           Exceeds credit by {formatMoney(Math.abs(projectedLeft))} THB
         </p>
       )}

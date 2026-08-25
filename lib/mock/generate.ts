@@ -183,7 +183,8 @@ function generateStocks(
   realSuppliers: Supplier[],
   minSubOrders: number,
 ): Stock[] {
-  const entryCount = salmons.length * realWarehouses.length * realSuppliers.length;
+  const entryCount =
+    salmons.length * realWarehouses.length * realSuppliers.length;
   // Average qty per stock entry, sized off expected demand for this
   // dataset; randomLotQty below keeps roughly this mean.
   const avgQtyPerEntry = Math.max(
@@ -300,7 +301,12 @@ export function generateDataset(options: GenerateOptions = {}): Dataset {
     suppliers,
     customers,
     prices: generatePrices(salmons, realSuppliers),
-    stocks: generateStocks(salmons, realWarehouses, realSuppliers, minSubOrders),
+    stocks: generateStocks(
+      salmons,
+      realWarehouses,
+      realSuppliers,
+      minSubOrders,
+    ),
     orders,
     subOrders,
     allocations: [],

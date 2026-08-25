@@ -91,7 +91,14 @@ export function fillSubOrder(
       continue;
     }
 
-    const allocation = applyPick(so, s, pickQty, unitPrice, customer, operation);
+    const allocation = applyPick(
+      so,
+      s,
+      pickQty,
+      unitPrice,
+      customer,
+      operation,
+    );
     allocations.push(allocation);
 
     creditLeft = minus(creditLeft, allocation.amount);

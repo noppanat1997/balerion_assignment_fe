@@ -75,7 +75,8 @@ export const useAllocation = create<AllocationState>()(
           current.subOrders.length === 0 ? generateDataset() : current;
         set({ data: allocateDataset(data) });
       },
-      reset: (options) => set({ data: allocateDataset(generateDataset(options)) }),
+      reset: (options) =>
+        set({ data: allocateDataset(generateDataset(options)) }),
       assignStock: (input) => {
         const data = get().data;
         const result = assignStock({

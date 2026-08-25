@@ -18,7 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CustomerCreditCard, isOverCredit } from "@/components/customer-credit-card";
+import {
+  CustomerCreditCard,
+  isOverCredit,
+} from "@/components/customer-credit-card";
 import { useAllocation } from "@/store/use-allocation";
 import { pickStock } from "@/lib/engine/stock";
 import { findBasePrice, getUnitPrice } from "@/lib/engine/price";
@@ -68,7 +71,8 @@ function ManualAssignForm({
   const data = useAllocation((s) => s.data);
   const assignStock = useAllocation((s) => s.assignStock);
 
-  const customer = data.customers.find((c) => c.id === subOrder.customerId) ?? null;
+  const customer =
+    data.customers.find((c) => c.id === subOrder.customerId) ?? null;
   const eligibleStocks = pickStock(subOrder, data.stocks, data.prices);
   const needQty = subOrder.requestQty - subOrder.allocatedQty;
 
@@ -106,7 +110,8 @@ function ManualAssignForm({
   }
 
   const salmonName =
-    data.salmons.find((s) => s.id === subOrder.salmonId)?.name ?? subOrder.salmonId;
+    data.salmons.find((s) => s.id === subOrder.salmonId)?.name ??
+    subOrder.salmonId;
   const warehouseName = (id: string) => {
     const name = data.warehouses.find((w) => w.id === id)?.name;
     return name ? idName(id, name) : id;
@@ -117,7 +122,11 @@ function ManualAssignForm({
   };
 
   const basePrice = selectedStock
-    ? findBasePrice(selectedStock.salmonId, selectedStock.supplierId, data.prices)
+    ? findBasePrice(
+        selectedStock.salmonId,
+        selectedStock.supplierId,
+        data.prices,
+      )
     : null;
   const unitPrice = selectedStock
     ? getUnitPrice(
@@ -129,7 +138,8 @@ function ManualAssignForm({
     : null;
 
   const qtyNum = Number(qty);
-  const cost = unitPrice !== null ? round2(multiply(unitPrice, qtyNum || 0)) : 0;
+  const cost =
+    unitPrice !== null ? round2(multiply(unitPrice, qtyNum || 0)) : 0;
 
   const creditLimit = customer?.creditLimit ?? 0;
   const creditUsed = customer?.creditUsed ?? 0;
@@ -158,21 +168,19 @@ function ManualAssignForm({
   return (
     <>
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">
-          Needs {needQty} more kg
-        </p>
+        <p className="text-muted-foreground text-sm">Needs {needQty} more kg</p>
 
-        <div className="flex flex-col gap-2 rounded-lg border p-2">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr]">
+        <div className="flex flex-col gap-2 p-2 border rounded-lg">
+          <div className="gap-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr]">
             <Select value={subOrder.salmonId} disabled>
               <SelectTrigger className="w-full">
                 <SelectValue>{salmonName}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={subOrder.salmonId}>
-                  <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                    <span className="truncate font-medium">{salmonName}</span>
-                    <span className="shrink-0 text-xs text-muted-foreground">
+                  <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                    <span className="font-medium truncate">{salmonName}</span>
+                    <span className="text-muted-foreground text-xs shrink-0">
                       {formatQty(salmonQty)} left
                     </span>
                   </span>
@@ -193,11 +201,11 @@ function ManualAssignForm({
               <SelectContent>
                 {warehouseIds.map((id) => (
                   <SelectItem key={id} value={id}>
-                    <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                      <span className="truncate font-medium">
+                    <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                      <span className="font-medium truncate">
                         {warehouseName(id)}
                       </span>
-                      <span className="shrink-0 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs shrink-0">
                         {formatQty(qtyForWarehouse(id))} left
                       </span>
                     </span>
@@ -219,11 +227,11 @@ function ManualAssignForm({
               <SelectContent>
                 {supplierIds.map((id) => (
                   <SelectItem key={id} value={id}>
-                    <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                      <span className="truncate font-medium">
+                    <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                      <span className="font-medium truncate">
                         {supplierName(id)}
                       </span>
-                      <span className="shrink-0 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs shrink-0">
                         {formatQty(qtyForSupplier(id))} left
                       </span>
                     </span>
@@ -234,43 +242,47 @@ function ManualAssignForm({
           </div>
 
           {eligibleStocks.length === 0 ? (
-            <p className="px-1 text-sm text-muted-foreground">
+            <p className="px-1 text-muted-foreground text-sm">
               No eligible stock found.
             </p>
           ) : !selectedStock ? (
-            <p className="px-1 text-sm text-muted-foreground">
+            <p className="px-1 text-muted-foreground text-sm">
               No stock for this combination.
             </p>
           ) : (
-            <p className="px-1 text-xs text-muted-foreground">
+            <p className="px-1 text-muted-foreground text-xs">
               {selectedStock.qty} kg available
             </p>
           )}
 
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <div className="flex items-center gap-1.5">
-              <Label className="text-xs text-muted-foreground">Qty</Label>
+              <Label className="text-muted-foreground text-xs">Qty</Label>
               <Input
                 type="number"
                 min={1}
                 step={1}
-                max={selectedStock ? Math.min(selectedStock.qty, needQty) : undefined}
+                max={
+                  selectedStock
+                    ? Math.min(selectedStock.qty, needQty)
+                    : undefined
+                }
                 className="w-20"
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
                 disabled={!selectedStock}
               />
             </div>
-            <span className="min-w-0 truncate text-xs text-muted-foreground">
+            <span className="min-w-0 text-muted-foreground text-xs truncate">
               {unitPrice !== null
                 ? `@ ${formatMoney(unitPrice)} = ${formatMoney(cost)} THB`
                 : "no price"}
             </span>
           </div>
           {basePrice !== null && unitPrice !== null && (
-            <p className="px-1 text-xs text-muted-foreground">
-              {formatMoney(basePrice)} × {PRICE_TIER[subOrder.priorityType]}{" "}
-              ({subOrder.priorityType}) = {formatMoney(unitPrice)} THB/kg
+            <p className="px-1 text-muted-foreground text-xs">
+              {formatMoney(basePrice)} × {PRICE_TIER[subOrder.priorityType]} (
+              {subOrder.priorityType}) = {formatMoney(unitPrice)} THB/kg
             </p>
           )}
         </div>

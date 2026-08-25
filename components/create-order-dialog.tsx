@@ -147,7 +147,8 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
     customer !== null && isOverCredit(creditLimit, creditUsed, totalCost);
 
   const linesValid = priced.every(
-    (line) => line.salmonId !== "" && Number.isInteger(line.qty) && line.qty > 0,
+    (line) =>
+      line.salmonId !== "" && Number.isInteger(line.qty) && line.qty > 0,
   );
   const canSubmit = customerId !== "" && linesValid && !overCredit;
 
@@ -183,11 +184,11 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
             <SelectContent>
               {data.customers.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                    <span className="truncate font-medium">
+                  <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                    <span className="font-medium truncate">
                       {idName(c.id, c.name)}
                     </span>
-                    <span className="shrink-0 text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs shrink-0">
                       {formatMoney(minus(c.creditLimit, c.creditUsed))} THB left
                     </span>
                   </span>
@@ -253,7 +254,7 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                   key={line.key}
                   className="flex flex-col gap-2 p-2 border rounded-lg"
                 >
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr]">
+                  <div className="gap-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr]">
                     <Select
                       value={line.salmonId}
                       onValueChange={(v) =>
@@ -262,17 +263,19 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Salmon">
-                          {line.salmonId ? salmonName(line.salmonId) : undefined}
+                          {line.salmonId
+                            ? salmonName(line.salmonId)
+                            : undefined}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {data.salmons.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
-                            <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                              <span className="truncate font-medium">
+                            <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                              <span className="font-medium truncate">
                                 {s.name}
                               </span>
-                              <span className="shrink-0 text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs shrink-0">
                                 {formatQty(
                                   stockQtyAvailable(
                                     s.id,
@@ -297,16 +300,18 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                       }
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue>{warehouseName(line.warehouseId)}</SelectValue>
+                        <SelectValue>
+                          {warehouseName(line.warehouseId)}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {data.warehouses.map((w) => (
                           <SelectItem key={w.id} value={w.id}>
-                            <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                              <span className="truncate font-medium">
+                            <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                              <span className="font-medium truncate">
                                 {idName(w.id, w.name)}
                               </span>
-                              <span className="shrink-0 text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs shrink-0">
                                 {formatQty(
                                   stockQtyAvailable(
                                     line.salmonId,
@@ -331,16 +336,18 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                       }
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue>{supplierName(line.supplierId)}</SelectValue>
+                        <SelectValue>
+                          {supplierName(line.supplierId)}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {data.suppliers.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
-                            <span className="flex w-full min-w-0 items-center justify-between gap-2">
-                              <span className="truncate font-medium">
+                            <span className="flex justify-between items-center gap-2 w-full min-w-0">
+                              <span className="font-medium truncate">
                                 {idName(s.id, s.name)}
                               </span>
-                              <span className="shrink-0 text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs shrink-0">
                                 {formatQty(
                                   stockQtyAvailable(
                                     line.salmonId,
@@ -397,9 +404,8 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                   </div>
                   {line.basePrice !== null && line.unitPrice !== null && (
                     <p className="text-muted-foreground text-xs">
-                      {formatMoney(line.basePrice)} ×{" "}
-                      {PRICE_TIER[priorityType]} ({priorityType}) ={" "}
-                      {formatMoney(line.unitPrice)} THB/kg
+                      {formatMoney(line.basePrice)} × {PRICE_TIER[priorityType]}{" "}
+                      ({priorityType}) = {formatMoney(line.unitPrice)} THB/kg
                     </p>
                   )}
                 </div>

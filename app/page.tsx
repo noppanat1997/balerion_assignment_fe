@@ -21,11 +21,11 @@ export default function Home() {
   if (!isMounted) return null;
 
   return (
-    <div className="flex flex-1 justify-center overflow-hidden p-3 sm:p-6">
-      <div className="flex min-h-0 w-full max-w-6xl flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-1 justify-center p-3 sm:p-6 overflow-hidden">
+      <div className="flex flex-col gap-4 w-full max-w-6xl min-h-0">
+        <div className="flex flex-wrap justify-between items-center gap-2">
           <div>
-            <h1 className="text-2xl font-medium sm:text-3xl">
+            <h1 className="font-medium text-2xl sm:text-3xl">
               <span className="font-black text-[#fa8072]">///</span> SALMONERIA
             </h1>
           </div>

@@ -14,7 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ManualAssignDialog } from "@/components/manual-assign-dialog";
 import { TYPE_PRIORITY } from "@/lib/constants";
 import { FillStatus, PriorityType, SubOrder } from "@/lib/types";
@@ -37,7 +41,10 @@ const GRID_COLS =
 // instead of scrolling into view. Keep in sync with GRID_COLS.
 const TABLE_MIN_WIDTH = "min-w-[1364px] lg:min-w-0";
 
-const PRIORITY_VARIANT: Record<PriorityType, "destructive" | "default" | "outline"> = {
+const PRIORITY_VARIANT: Record<
+  PriorityType,
+  "destructive" | "default" | "outline"
+> = {
   EMERGENCY: "destructive",
   OVER_DUE: "default",
   DAILY: "outline",
@@ -55,7 +62,12 @@ const FILL_VARIANT: Record<FillStatus, "default" | "secondary" | "outline"> = {
 
 type PriorityFilter = PriorityType | "ALL";
 type StatusFilter = FillStatus | "ALL";
-type SortKey = "default" | "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
+type SortKey =
+  | "default"
+  | "date-desc"
+  | "date-asc"
+  | "amount-desc"
+  | "amount-asc";
 
 const SORT_LABEL: Record<SortKey, string> = {
   default: "Needs fill first",
@@ -72,7 +84,8 @@ function compareDefault(a: SubOrder, b: SubOrder): number {
   const bFull = b.fillStatus === "FULL" ? 1 : 0;
   if (aFull !== bFull) return aFull - bFull;
 
-  const byPriority = TYPE_PRIORITY[a.priorityType] - TYPE_PRIORITY[b.priorityType];
+  const byPriority =
+    TYPE_PRIORITY[a.priorityType] - TYPE_PRIORITY[b.priorityType];
   if (byPriority !== 0) return byPriority;
 
   return a.createdAt.localeCompare(b.createdAt);
@@ -189,8 +202,8 @@ export function SubOrdersTable() {
   });
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-col flex-1 gap-3 min-h-0">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Input
             value={search}
@@ -229,7 +242,7 @@ export function SubOrdersTable() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="whitespace-nowrap text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs whitespace-nowrap">
             {visibleSubOrders.length.toLocaleString()} of{" "}
             {data.subOrders.length.toLocaleString()}
           </span>
@@ -252,8 +265,11 @@ export function SubOrdersTable() {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
-        <div ref={parentRef} className="flex-1 overflow-auto lg:overflow-x-hidden">
+      <div className="flex flex-col flex-1 border rounded-lg min-h-0 overflow-hidden">
+        <div
+          ref={parentRef}
+          className="flex-1 overflow-auto lg:overflow-x-hidden"
+        >
           <div
             className={`sticky top-0 z-10 grid ${GRID_COLS} ${TABLE_MIN_WIDTH} gap-2 border-b bg-background px-3 py-2 text-xs text-muted-foreground`}
           >
@@ -273,7 +289,10 @@ export function SubOrdersTable() {
 
           <div
             className={TABLE_MIN_WIDTH}
-            style={{ height: rowVirtualizer.getTotalSize(), position: "relative" }}
+            style={{
+              height: rowVirtualizer.getTotalSize(),
+              position: "relative",
+            }}
           >
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const so = visibleSubOrders[virtualRow.index];
@@ -308,7 +327,7 @@ export function SubOrdersTable() {
                       {so.priorityType}
                     </Badge>
                   </div>
-                  <div className="text-right text-xs tabular-nums">
+                  <div className="tabular-nums text-xs text-right">
                     {so.allocatedQty}/{so.requestQty} kg
                   </div>
                   <div className="overflow-hidden">
@@ -318,15 +337,15 @@ export function SubOrdersTable() {
                   </div>
                   <TruncatedCell
                     value={`${formatMoney(so.totalAmount)} THB`}
-                    className="text-right text-xs"
+                    className="text-xs text-right"
                   />
                   {so.remark ? (
                     <TruncatedCell
                       value={so.remark}
-                      className="text-xs text-muted-foreground"
+                      className="text-muted-foreground text-xs"
                     />
                   ) : (
-                    <div className="truncate text-xs text-muted-foreground">
+                    <div className="text-muted-foreground text-xs truncate">
                       —
                     </div>
                   )}

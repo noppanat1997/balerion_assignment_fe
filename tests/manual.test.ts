@@ -41,7 +41,10 @@ describe("assignStock", () => {
   });
 
   it("clamps to whichever is smallest: requested qty, stock on hand, remaining need, or credit", () => {
-    expect(runAssign({ qty: 500, stocks: [stock({ qty: 7 })] }).newAllocations[0].qty).toBe(7);
+    expect(
+      runAssign({ qty: 500, stocks: [stock({ qty: 7 })] }).newAllocations[0]
+        .qty,
+    ).toBe(7);
     expect(
       runAssign({ qty: 500, subOrders: [subOrder({ requestQty: 3 })] })
         .newAllocations[0].qty,
@@ -55,7 +58,9 @@ describe("assignStock", () => {
   });
 
   it("does nothing when the sub order or stock id is unknown", () => {
-    expect(runAssign({ subOrderId: "SO-missing" }).newAllocations).toHaveLength(0);
+    expect(runAssign({ subOrderId: "SO-missing" }).newAllocations).toHaveLength(
+      0,
+    );
     expect(runAssign({ stockId: "missing" }).newAllocations).toHaveLength(0);
   });
 });
