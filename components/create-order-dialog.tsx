@@ -240,7 +240,7 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
           <div className="flex justify-between items-center">
             <Label>Salmon</Label>
             <Button size="sm" variant="outline" onClick={addLine}>
-              <span className="font-black text-[#fa8072]">///</span>
+              <span className="font-black text-[#fa8072]">{"///"}</span>
               Add Salmon
             </Button>
           </div>

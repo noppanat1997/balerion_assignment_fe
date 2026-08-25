@@ -26,7 +26,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-between items-center gap-2">
           <div>
             <h1 className="font-medium text-2xl sm:text-3xl">
-              <span className="font-black text-[#fa8072]">///</span> SALMONERIA
+              <span className="font-black text-[#fa8072]">{"///"}</span> SALMONERIA
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
