@@ -83,24 +83,16 @@ function ManualAssignForm({
       (s) => s.warehouseId === warehouseId && s.supplierId === supplierId,
     ) ?? null;
 
-  const [qty, setQty] = useState(() =>
-    selectedStock ? String(Math.min(needQty, selectedStock.qty)) : "",
-  );
+  const [qty, setQty] = useState("0");
 
   function selectWarehouse(id: string) {
     setWarehouseId(id);
-    const stock = eligibleStocks.find(
-      (s) => s.warehouseId === id && s.supplierId === supplierId,
-    );
-    setQty(stock ? String(Math.min(needQty, stock.qty)) : "");
+    setQty("0");
   }
 
   function selectSupplier(id: string) {
     setSupplierId(id);
-    const stock = eligibleStocks.find(
-      (s) => s.warehouseId === warehouseId && s.supplierId === id,
-    );
-    setQty(stock ? String(Math.min(needQty, stock.qty)) : "");
+    setQty("0");
   }
 
   const salmonName =
