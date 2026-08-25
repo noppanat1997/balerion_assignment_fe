@@ -16,7 +16,7 @@ import { useAllocation } from "@/store/use-allocation";
 import { DEFAULT_MIN_SUBORDERS } from "@/lib/mock/generate";
 import { DEFAULT_SEED } from "@/lib/mock/seed";
 
-const MAX_MIN_SUBORDERS = 50000;
+const MAX_MIN_SUBORDERS = 10000;
 
 export function ResetDatasetDialog() {
   const [open, setOpen] = useState(false);
