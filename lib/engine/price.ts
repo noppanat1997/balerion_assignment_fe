@@ -2,9 +2,6 @@ import { ANY_SUPPLIER, PRICE_TIER } from "../constants";
 import { multiply, round2 } from "../money";
 import { Price, PriorityType } from "../types";
 
-export const priceKey = (salmonId: string, supplierId: string) =>
-  `${salmonId}|${supplierId}`;
-
 export function findPrice(
   salmonId: string,
   supplierId: string,

@@ -1,5 +1,5 @@
 import { allocate } from "@/lib/engine/allocate";
-import { assignStock, manualAllocate } from "@/lib/engine/manual";
+import { assignStock } from "@/lib/engine/manual";
 import { Dataset, GenerateOptions, generateDataset } from "@/lib/mock/generate";
 import { nextIdFrom, subOrderId } from "@/lib/mock/seed";
 import { Order, PriorityType, SubOrder } from "@/lib/types";
@@ -36,7 +36,7 @@ function allocateDataset(data: Dataset): Dataset {
   };
 }
 
-export interface AssignStockInput {
+interface AssignStockInput {
   subOrderId: string;
   stockId: string;
   qty: number;
@@ -49,7 +49,7 @@ export interface OrderLineInput {
   requestQty: number;
 }
 
-export interface CreateOrderInput {
+interface CreateOrderInput {
   customerId: string;
   priorityType: PriorityType;
   remark?: string;
@@ -61,7 +61,6 @@ interface AllocationState {
 
   init: () => void;
   reset: (options?: GenerateOptions) => void;
-  manualAllocate: (subOrderId: string) => void;
   assignStock: (input: AssignStockInput) => void;
   createOrder: (input: CreateOrderInput) => void;
 }
@@ -77,26 +76,6 @@ export const useAllocation = create<AllocationState>()(
         set({ data: allocateDataset(data) });
       },
       reset: (options) => set({ data: allocateDataset(generateDataset(options)) }),
-      manualAllocate: (subOrderId) => {
-        const data = get().data;
-        const result = manualAllocate({
-          subOrderId,
-          subOrders: data.subOrders,
-          stocks: data.stocks,
-          prices: data.prices,
-          customers: data.customers,
-        });
-
-        set({
-          data: {
-            ...data,
-            subOrders: result.subOrders,
-            stocks: result.stocks,
-            customers: result.customers,
-            allocations: [...data.allocations, ...result.newAllocations],
-          },
-        });
-      },
       assignStock: (input) => {
         const data = get().data;
         const result = assignStock({

@@ -1,7 +1,7 @@
 import { TYPE_PRIORITY } from "../constants";
 import { SubOrder } from "../types";
 
-export function compareSubOrders(a: SubOrder, b: SubOrder): number {
+function compareSubOrders(a: SubOrder, b: SubOrder): number {
   const byType = TYPE_PRIORITY[a.priorityType] - TYPE_PRIORITY[b.priorityType];
   if (byType !== 0) return byType;
 
