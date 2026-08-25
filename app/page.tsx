@@ -5,6 +5,7 @@ import { useAllocation } from "@/store/use-allocation";
 import { CreateOrderDialog } from "@/components/create-order-dialog";
 import { ResetDatasetDialog } from "@/components/reset-dataset-dialog";
 import { SubOrdersTable } from "@/components/sub-orders-table";
+import { OrderStats } from "@/components/order-stats";
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
@@ -33,6 +34,7 @@ export default function Home() {
             <ResetDatasetDialog />
           </div>
         </div>
+        <OrderStats />
         <SubOrdersTable />
       </div>
     </div>
