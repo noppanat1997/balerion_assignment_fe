@@ -25,6 +25,41 @@ store/        Zustand store wiring the engine to the UI
 tests/        Vitest unit tests, one file per engine concern
 ```
 
+## Algorithm
+
+Sort sub orders (priority → date → id) → match eligible stock (salmon/warehouse/supplier, highest qty first) → price it (base × priority tier) → fill with `min(stock, qty needed, credit left)`, partial allowed. Manual override reuses the same fill logic, just for one chosen stock. Money uses `decimal.js` (round-half-even) to avoid float drift.
+
+## Performance
+
+- Table is virtualized (`@tanstack/react-virtual`) — smooth scroll at 5,000–10,000 rows.
+- Allocation pass is a single O(n log n) sort + per-order stock scan, no repeated lookups (customers resolved via id map).
+- Mock data generation is seeded/deterministic and scales pool sizes with dataset size.
+- Large resets show a "Resetting…" state instead of freezing the UI.
+
+## Ease of use
+
+- Sortable/filterable table, newest-first by default, tooltips on truncated cells.
+- Selects (customer/salmon/warehouse/supplier) show remaining credit/qty inline, so invalid picks are obvious before submitting.
+- Manual override dialog to redirect a sub order to a specific stock.
+- Responsive layout; state persists in `localStorage` across refreshes.
+
+## Initiative
+
+- Configurable Reset Dataset (seed + size) instead of one fixed dataset.
+- Order stats bar (today's allocated vs. requested).
+- Decimal-safe money math to avoid rounding drift.
+- Shared pick logic between auto-fill and manual assign, so both stay consistent.
+- Actually deployed it (see below).
+
+## Deploy (Bonus)
+
+Live on **Cloudflare Workers** via `@opennextjs/cloudflare`: https://salmoneria.motionbi.work/
+
+```bash
+npm run preview   # build + local preview
+npm run deploy    # build + wrangler deploy
+```
+
 ## Data model
 
 ```mermaid
