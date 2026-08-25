@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { customer, price, stock, subOrder } from "./allocate.test";
 
 describe("fillSubOrder", () => {
-  it("spans multiple stocks, going PARTIAL then FULL once the need is met", () => {
+  it("spans multiple stocks, highest remaining stock first, until the need is met", () => {
     const so = subOrder({ requestQty: 30 });
     const stocks = [
       stock({ id: "A", warehouseId: "WH-001", qty: 10 }),
@@ -13,8 +13,8 @@ describe("fillSubOrder", () => {
 
     const allocations = fillSubOrder(so, stocks, [price()], c, "AUTO");
 
-    expect(allocations.map((a) => a.qty)).toEqual([10, 20]);
-    expect(stocks.map((s) => s.qty)).toEqual([0, 5]);
+    expect(allocations.map((a) => a.qty)).toEqual([25, 5]);
+    expect(stocks.map((s) => s.qty)).toEqual([5, 0]);
     expect(so).toMatchObject({ allocatedQty: 30, fillStatus: "FULL" });
     expect(c.creditUsed).toBe(3000);
   });

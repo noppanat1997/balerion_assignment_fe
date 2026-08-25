@@ -77,7 +77,7 @@ describe("allocate", () => {
     expect(c.creditUsed).toBe(0);
   });
 
-  it("spans several stocks and stays PARTIAL when supply runs out", () => {
+  it("spans several stocks, highest remaining stock first, and stays PARTIAL when supply runs out", () => {
     const res = run({
       subOrders: [subOrder({ requestQty: 30 })],
       stocks: [
@@ -90,7 +90,7 @@ describe("allocate", () => {
       allocatedQty: 25,
       fillStatus: "PARTIAL",
     });
-    expect(res.newAllocations.map((a) => a.qty)).toEqual([10, 15]);
+    expect(res.newAllocations.map((a) => a.qty)).toEqual([15, 10]);
   });
 
   it("serves the higher priority sub order first", () => {

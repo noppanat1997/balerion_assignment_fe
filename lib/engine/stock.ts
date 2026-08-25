@@ -22,6 +22,10 @@ function matchesQuery(query: StockQuery, stock: Stock): boolean {
 // allocation engine draws from them. Shared by pickStock (actual
 // allocation), stockQtyAvailable, and estimateUnitPrice (UI previews) so
 // they can't drift apart on what counts as "available".
+//
+// Highest remaining qty first, per spec: an ANY_WAREHOUSE/ANY_SUPPLIER
+// query should prioritize whichever warehouse/supplier has the most stock
+// left. id is only a tiebreak for determinism when qty is equal.
 function findEligibleStocks(
   query: StockQuery,
   stocks: Stock[],
@@ -34,7 +38,7 @@ function findEligibleStocks(
         findPrice(s.salmonId, s.supplierId, prices) !== undefined &&
         matchesQuery(query, s),
     )
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => b.qty - a.qty || a.id.localeCompare(b.id));
 }
 
 export function pickStock(
@@ -70,9 +74,10 @@ export function stockQtyAvailable(
 }
 
 // "Any Supplier" draws from whichever eligible stock the allocation engine
-// would pick first (see findEligibleStocks' id-sort order), not necessarily
-// the cheapest one — estimate off that same stock so credit checks reflect
-// what the order will actually be charged, not an optimistic lower bound.
+// would pick first (see findEligibleStocks' highest-qty-first order), not
+// necessarily the cheapest one — estimate off that same stock so credit
+// checks reflect what the order will actually be charged, not an
+// optimistic lower bound.
 export function estimateUnitPrice(
   priorityType: PriorityType,
   salmonId: string,

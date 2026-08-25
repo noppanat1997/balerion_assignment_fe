@@ -70,4 +70,20 @@ describe("pickStock", () => {
     );
     expect(pinnedRes.map((s) => s.id)).toEqual(["B"]);
   });
+
+  it("orders ANY_WAREHOUSE/ANY_SUPPLIER candidates by highest remaining stock first", () => {
+    const stocks = [
+      stock({ id: "low", warehouseId: "WH-001", supplierId: "SP-001", qty: 5 }),
+      stock({ id: "high", warehouseId: "WH-002", supplierId: "SP-002", qty: 50 }),
+      stock({ id: "mid", warehouseId: "WH-003", supplierId: "SP-003", qty: 20 }),
+    ];
+    const prices = [
+      price({ id: "P1", supplierId: "SP-001" }),
+      price({ id: "P2", supplierId: "SP-002" }),
+      price({ id: "P3", supplierId: "SP-003" }),
+    ];
+
+    const res = pickStock(subOrder(), stocks, prices);
+    expect(res.map((s) => s.id)).toEqual(["high", "mid", "low"]);
+  });
 });
