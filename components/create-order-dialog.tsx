@@ -28,9 +28,9 @@ import { useAllocation, type OrderLineInput } from "@/store/use-allocation";
 import { ANY_SUPPLIER, ANY_WAREHOUSE, PRICE_TIER } from "@/lib/constants";
 import { findBasePrice } from "@/lib/engine/price";
 import { estimateUnitPrice, stockQtyAvailable } from "@/lib/engine/stock";
-import { multiply, plus, round2 } from "@/lib/money";
+import { minus, multiply, plus, round2 } from "@/lib/money";
 import { PriorityType } from "@/lib/types";
-import { formatMoney, idName } from "@/lib/utils";
+import { formatMoney, formatQty, idName } from "@/lib/utils";
 
 const PRIORITIES: PriorityType[] = ["EMERGENCY", "OVER_DUE", "DAILY"];
 
@@ -81,6 +81,17 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
   const [lines, setLines] = useState<LineState[]>([emptyLine()]);
 
   const customer = data.customers.find((c) => c.id === customerId) ?? null;
+
+  const salmonName = (id: string) =>
+    data.salmons.find((s) => s.id === id)?.name ?? id;
+  const warehouseName = (id: string) => {
+    const w = data.warehouses.find((w) => w.id === id);
+    return w ? idName(w.id, w.name) : id;
+  };
+  const supplierName = (id: string) => {
+    const s = data.suppliers.find((s) => s.id === id);
+    return s ? idName(s.id, s.name) : id;
+  };
 
   function updateLine(key: string, patch: Partial<LineState>) {
     setLines((prev) =>
@@ -165,12 +176,21 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
           <Label>Customer</Label>
           <Select value={customerId} onValueChange={setCustomerId}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select customer" />
+              <SelectValue placeholder="Select customer">
+                {customer ? idName(customer.id, customer.name) : undefined}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {data.customers.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {idName(c.id, c.name)}
+                  <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                    <span className="truncate font-medium">
+                      {idName(c.id, c.name)}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {formatMoney(minus(c.creditLimit, c.creditUsed))} THB left
+                    </span>
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -241,12 +261,30 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                       }
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Salmon" />
+                        <SelectValue placeholder="Salmon">
+                          {line.salmonId ? salmonName(line.salmonId) : undefined}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {data.salmons.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
-                            {s.name}
+                            <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                              <span className="truncate font-medium">
+                                {s.name}
+                              </span>
+                              <span className="shrink-0 text-xs text-muted-foreground">
+                                {formatQty(
+                                  stockQtyAvailable(
+                                    s.id,
+                                    line.warehouseId,
+                                    line.supplierId,
+                                    data.stocks,
+                                    data.prices,
+                                  ),
+                                )}{" "}
+                                left
+                              </span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -259,12 +297,28 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                       }
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue />
+                        <SelectValue>{warehouseName(line.warehouseId)}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {data.warehouses.map((w) => (
                           <SelectItem key={w.id} value={w.id}>
-                            {idName(w.id, w.name)}
+                            <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                              <span className="truncate font-medium">
+                                {idName(w.id, w.name)}
+                              </span>
+                              <span className="shrink-0 text-xs text-muted-foreground">
+                                {formatQty(
+                                  stockQtyAvailable(
+                                    line.salmonId,
+                                    w.id,
+                                    line.supplierId,
+                                    data.stocks,
+                                    data.prices,
+                                  ),
+                                )}{" "}
+                                left
+                              </span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -277,12 +331,28 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                       }
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue />
+                        <SelectValue>{supplierName(line.supplierId)}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {data.suppliers.map((s) => (
                           <SelectItem key={s.id} value={s.id}>
-                            {idName(s.id, s.name)}
+                            <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                              <span className="truncate font-medium">
+                                {idName(s.id, s.name)}
+                              </span>
+                              <span className="shrink-0 text-xs text-muted-foreground">
+                                {formatQty(
+                                  stockQtyAvailable(
+                                    line.salmonId,
+                                    line.warehouseId,
+                                    s.id,
+                                    data.stocks,
+                                    data.prices,
+                                  ),
+                                )}{" "}
+                                left
+                              </span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>

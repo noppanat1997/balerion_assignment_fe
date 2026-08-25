@@ -25,7 +25,7 @@ import { findBasePrice, getUnitPrice } from "@/lib/engine/price";
 import { PRICE_TIER } from "@/lib/constants";
 import { multiply, round2 } from "@/lib/money";
 import type { SubOrder } from "@/lib/types";
-import { formatMoney, idName } from "@/lib/utils";
+import { formatMoney, formatQty, idName } from "@/lib/utils";
 
 interface ManualAssignDialogProps {
   subOrderId: string | null;
@@ -74,6 +74,16 @@ function ManualAssignForm({
 
   const warehouseIds = [...new Set(eligibleStocks.map((s) => s.warehouseId))];
   const supplierIds = [...new Set(eligibleStocks.map((s) => s.supplierId))];
+
+  const salmonQty = eligibleStocks.reduce((sum, s) => sum + s.qty, 0);
+  const qtyForWarehouse = (id: string) =>
+    eligibleStocks
+      .filter((s) => s.warehouseId === id)
+      .reduce((sum, s) => sum + s.qty, 0);
+  const qtyForSupplier = (id: string) =>
+    eligibleStocks
+      .filter((s) => s.supplierId === id)
+      .reduce((sum, s) => sum + s.qty, 0);
 
   const [warehouseId, setWarehouseId] = useState(warehouseIds[0] ?? "");
   const [supplierId, setSupplierId] = useState(supplierIds[0] ?? "");
@@ -159,7 +169,14 @@ function ManualAssignForm({
                 <SelectValue>{salmonName}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={subOrder.salmonId}>{salmonName}</SelectItem>
+                <SelectItem value={subOrder.salmonId}>
+                  <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                    <span className="truncate font-medium">{salmonName}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {formatQty(salmonQty)} left
+                    </span>
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -169,12 +186,21 @@ function ManualAssignForm({
               disabled={warehouseIds.length === 0}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Warehouse" />
+                <SelectValue placeholder="Warehouse">
+                  {warehouseId ? warehouseName(warehouseId) : undefined}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {warehouseIds.map((id) => (
                   <SelectItem key={id} value={id}>
-                    {warehouseName(id)}
+                    <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                      <span className="truncate font-medium">
+                        {warehouseName(id)}
+                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatQty(qtyForWarehouse(id))} left
+                      </span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -186,12 +212,21 @@ function ManualAssignForm({
               disabled={supplierIds.length === 0}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Supplier" />
+                <SelectValue placeholder="Supplier">
+                  {supplierId ? supplierName(supplierId) : undefined}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {supplierIds.map((id) => (
                   <SelectItem key={id} value={id}>
-                    {supplierName(id)}
+                    <span className="flex w-full min-w-0 items-center justify-between gap-2">
+                      <span className="truncate font-medium">
+                        {supplierName(id)}
+                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatQty(qtyForSupplier(id))} left
+                      </span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

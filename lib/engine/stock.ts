@@ -14,7 +14,8 @@ function matchesQuery(query: StockQuery, stock: Stock): boolean {
     query.warehouseId === stock.warehouseId;
   const supplierOk =
     query.supplierId === ANY_SUPPLIER || query.supplierId === stock.supplierId;
-  return warehouseOk && supplierOk && query.salmonId === stock.salmonId;
+  const salmonOk = query.salmonId === "" || query.salmonId === stock.salmonId;
+  return warehouseOk && supplierOk && salmonOk;
 }
 
 // Priced, in-stock candidates for a query, in the same order the
@@ -52,6 +53,8 @@ export function pickStock(
   );
 }
 
+// salmonId === "" matches any salmon (used for warehouse/supplier qty hints
+// before a salmon is picked).
 export function stockQtyAvailable(
   salmonId: string,
   warehouseId: string,
