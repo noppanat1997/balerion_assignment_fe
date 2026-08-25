@@ -163,7 +163,7 @@ function ManualAssignForm({
         </p>
 
         <div className="flex flex-col gap-2 rounded-lg border p-2">
-          <div className="grid grid-cols-[1fr_1fr_1fr] gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr]">
             <Select value={subOrder.salmonId} disabled>
               <SelectTrigger className="w-full">
                 <SelectValue>{salmonName}</SelectValue>

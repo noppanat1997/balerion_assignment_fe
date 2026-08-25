@@ -21,11 +21,21 @@ import { FillStatus, PriorityType, SubOrder } from "@/lib/types";
 import { cn, formatDate, formatMoney, idName } from "@/lib/utils";
 
 const ROW_HEIGHT = 44;
-// Only the name columns (Customer/Salmon/Warehouse/Supplier) shrink+truncate
-// under pressure; the rest are sized to their content so badges, numbers,
-// and the action button never overflow their track.
+// Below lg, name/remark columns have a floor and the table scrolls
+// horizontally (see the parentRef container below) once the viewport can't
+// fit every floor, instead of squeezing text unreadably. At lg+ there's
+// enough width for the whole table, so those columns shrink to fit instead
+// (floor 0) and horizontal scroll is disabled.
 const GRID_COLS =
-  "grid-cols-[100px_100px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_92px_90px_84px_120px_minmax(0,1fr)_36px]";
+  "grid-cols-[100px_100px_minmax(140px,1.3fr)_minmax(110px,1fr)_minmax(140px,1.3fr)_minmax(120px,1.1fr)_92px_90px_84px_120px_minmax(120px,1fr)_36px] lg:grid-cols-[100px_100px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_92px_90px_84px_120px_minmax(0,1fr)_36px]";
+
+// Sum of GRID_COLS' below-lg floors (1252) + 11 gaps of gap-2 (88) + px-3
+// padding (24) = 1364. Absolutely positioned rows (used for virtualization)
+// don't stretch their auto-width parent to fit their own overflow, so
+// without an explicit min-width here the parent never grows enough for
+// horizontal scrolling to kick in and rows past that edge get clipped
+// instead of scrolling into view. Keep in sync with GRID_COLS.
+const TABLE_MIN_WIDTH = "min-w-[1364px] lg:min-w-0";
 
 const PRIORITY_VARIANT: Record<PriorityType, "destructive" | "default" | "outline"> = {
   EMERGENCY: "destructive",
@@ -243,9 +253,9 @@ export function SubOrdersTable() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
-        <div ref={parentRef} className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div ref={parentRef} className="flex-1 overflow-auto lg:overflow-x-hidden">
           <div
-            className={`sticky top-0 z-10 grid ${GRID_COLS} gap-2 border-b bg-background px-3 py-2 text-xs text-muted-foreground`}
+            className={`sticky top-0 z-10 grid ${GRID_COLS} ${TABLE_MIN_WIDTH} gap-2 border-b bg-background px-3 py-2 text-xs text-muted-foreground`}
           >
             <div>Sub Order</div>
             <div>Date</div>
@@ -262,6 +272,7 @@ export function SubOrdersTable() {
           </div>
 
           <div
+            className={TABLE_MIN_WIDTH}
             style={{ height: rowVirtualizer.getTotalSize(), position: "relative" }}
           >
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {

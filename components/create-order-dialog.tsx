@@ -253,7 +253,7 @@ function CreateOrderForm({ onDone }: { onDone: () => void }) {
                   key={line.key}
                   className="flex flex-col gap-2 p-2 border rounded-lg"
                 >
-                  <div className="gap-2 grid grid-cols-[1fr_1fr_1fr]">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr]">
                     <Select
                       value={line.salmonId}
                       onValueChange={(v) =>
