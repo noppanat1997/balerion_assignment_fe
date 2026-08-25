@@ -1,3 +1,4 @@
+import { PRICE_TIER } from "../constants";
 import {
   Allocation,
   Customer,
@@ -35,6 +36,12 @@ export interface Dataset {
 
 const PRIORITY_TYPES: PriorityType[] = ["EMERGENCY", "OVER_DUE", "DAILY"];
 export const DEFAULT_MIN_SUBORDERS = 5000;
+
+// Matches generatePrices' randInt(MIN_PRICE, MAX_PRICE) range below.
+const MIN_PRICE = 100;
+const MAX_PRICE = 500;
+// Worst case a line could ever cost per kg, across all priority tiers.
+const MAX_UNIT_PRICE = MAX_PRICE * Math.max(...Object.values(PRICE_TIER));
 
 const randInt = (min: number, max: number) =>
   Math.floor(random() * (max - min + 1)) + min;
@@ -76,7 +83,7 @@ function generatePrices(): Price[] {
         id: nextId("PRC"),
         salmonId: salmon.id,
         supplierId: supplier.id,
-        price: randInt(100, 500),
+        price: randInt(MIN_PRICE, MAX_PRICE),
       });
     }
   }
@@ -109,11 +116,19 @@ function generateOrdersAndSubOrders(
   const subOrders: SubOrder[] = [];
 
   while (subOrders.length < minSubOrders) {
+    const customer = pick(customers);
     const order: Order = {
       id: nextId("ORDER"),
-      customerId: pick(customers).id,
+      customerId: customer.id,
     };
     orders.push(order);
+
+    // Cap a single line's quantity so its worst-case cost (at max price and
+    // priority tier) never exceeds the customer's entire credit limit.
+    const maxAffordableQty = Math.max(
+      1,
+      Math.min(200, Math.floor(customer.creditLimit / MAX_UNIT_PRICE)),
+    );
 
     const lineCount = randInt(1, 4);
     for (let seq = 0; seq < lineCount; seq++) {
@@ -124,7 +139,7 @@ function generateOrdersAndSubOrders(
         salmonId: pick(SALMONS).id,
         warehouseId: pick(WAREHOUSES).id,
         supplierId: pick(SUPPLIERS).id,
-        requestQty: randInt(1, 200),
+        requestQty: randInt(1, maxAffordableQty),
         allocatedQty: 0,
         totalAmount: 0,
         priorityType: pick(PRIORITY_TYPES),
